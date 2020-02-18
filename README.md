@@ -1,4 +1,4 @@
-## BOOM Verifier
+## Chipyard Verifier
 This program automates the verification and microbenchmarking using Verilator
 in Chipyard. It will compile a verilator executable and can run the ISA-test,
 microbenchmark and a Spectre-Attack and record the results.
@@ -9,8 +9,10 @@ verilator executable
 ```
 verify --config SmallBoomConfig --compile --asm --bmark --print --terminate --output boom.out
 ```
-Will compile, run ISA test, run benchmark test, print to terminal and boom.out
+- Will compile, run ISA test, run benchmark test, print to terminal and boom.out
 and stop execution on first error. 
+- Uses multithreading to speed things up. Passes -j6 to Makefile and uses
+  n\_threads = n\_cores for running ISA-tests and benchmarks
 
 
 ## What do we want?
