@@ -1,0 +1,12 @@
+[package]
+name = "verify"
+version = "0.1.0"
+authors = ["Erling Rennemo Jellum <erlingrj@stud.ntnu.no>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2.33.0"
+glob = "0.3.0"
+rayon = "1.1"
