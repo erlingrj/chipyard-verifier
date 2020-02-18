@@ -1,5 +1,5 @@
 ## Chipyard Verifier
-This program automates the verification and microbenchmarking using Verilator
+This program automates the build, verification and microbenchmarking using Verilator
 in Chipyard. It will compile a verilator executable and can run the ISA-test,
 microbenchmark and a Spectre-Attack and record the results.
 
