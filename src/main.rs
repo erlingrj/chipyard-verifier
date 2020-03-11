@@ -66,7 +66,7 @@ fn main() {
             RISCV = Some(String::from(val));
         }
     }
-    let BENCHMARK_PATH: String = format!("{}/{}", RISCV.clone().unwrap(), "riscv64-unknown-elf/share/riscv-tests/benchmarks");
+    let BENCHMARK_PATH: String = String::from("/home/erling/riscv-tests/benchmarks");
     let ASM_PATH: String = format!("{}/{}", RISCV.clone().unwrap(), "/riscv64-unknown-elf/share/riscv-tests/isa");
 
 
@@ -161,7 +161,7 @@ fn main() {
             }
         }
 
-        let bmark_results: Vec<(String, bool, u32, u32)> = bmarks.par_iter()
+        let bmark_results: Vec<(String, bool, u32, u32, u32, u32)> = bmarks.par_iter()
             .map(|(path, _, _, _)| {
                 let sim_c = SIMULATOR.clone();
                 let path_c = path.clone();
@@ -171,21 +171,21 @@ fn main() {
                                           .output()
                                           .expect("Run benchmark failed");
                 if output.status.success() {
-                     let (cycles, instr) = parse_bmark_output(output.stdout);
-                    (program_name, true, cycles, instr)
+                     let (cycles, instr,aq,bq) = parse_bmark_output(output.stdout);
+                    (program_name, true, cycles, instr,aq,bq)
                 } else {
                     if terminate {
                         exit(1);
                     }
 
-                    (program_name, false, 0, 0)
+                    (program_name, false, 0, 0,0,0)
                 }
 
             }
             ).collect();
 
-            for (program_name, res, cc, insts) in bmark_results {
-                log(format!("{}: {}, CC={}, insts={}",program_name,res, cc,insts).as_str(), Some(&output_file), print);
+            for (program_name, res, cc, insts,aq,bq) in bmark_results {
+                log(format!("{}: {}, CC={}, insts={}, AQ={}, BQ={}",program_name,res, cc,insts,aq,bq).as_str(), Some(&output_file), print);
                 if terminate && !res {
                     exit(1);
                 }
@@ -223,10 +223,12 @@ fn main() {
 
 // parse_bmark_output takes the raw byte output from a benchmark program
 //  and returns (nCycles, nInstr)
-fn parse_bmark_output(out: Vec<u8>) -> (u32,u32) {
+fn parse_bmark_output(out: Vec<u8>) -> (u32,u32,u32,u32) {
     let output = String::from_utf8(out).unwrap();
     let mut cycles: u32 = 0;
     let mut insts: u32 = 0;
+    let mut aq: u32 = 0;
+    let mut bq: u32 = 0;
     for line in output.lines() {
         if line.contains("mcycle") {
             let words: Vec<&str> =  line.split(' ').collect();
@@ -251,9 +253,16 @@ fn parse_bmark_output(out: Vec<u8>) -> (u32,u32) {
                 let words: Vec<&str> = line.split(' ').collect();
                 cycles = words[1].parse::<u32>().unwrap();
             }
+        } else if line.contains("AQ") {
+            let words: Vec<&str> = line.split(' ').collect();
+            aq += words[2].parse::<u32>().unwrap();
+        
+        } else if line.contains("BQ") {
+            let words: Vec<&str> = line.split(' ').collect();
+            bq += words[2].parse::<u32>().unwrap();
         }
     }
-    (cycles, insts)
+    (cycles, insts, aq, bq)
 
 }
 
